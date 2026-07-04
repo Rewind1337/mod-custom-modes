@@ -157,5 +157,5 @@ INSERT INTO hardmode_auras (`mode`, `aura`, `description`) VALUES
 ```
 
 ## Credits
-Thanks to [ZhengPeiRu21](https://github.com/ZhengPeiRu21) for creating the original module which inspired this one.
-Thanks to [AnchyDev](https://github.com/AnchyDev) for creating the HardMode-module which this is just an updated version of.
+- Thanks to [ZhengPeiRu21](https://github.com/ZhengPeiRu21) for creating the original original module which inspired the HardMode one.
+- Thanks to [AnchyDev](https://github.com/AnchyDev) for creating the HardMode-module which this is just an updated version of.
