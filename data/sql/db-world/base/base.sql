@@ -1,17 +1,19 @@
 DROP TABLE IF EXISTS `hardmode_rewards`;
 CREATE TABLE IF NOT EXISTS `hardmode_rewards` (
-  `mode` int(11) NOT NULL,
-  `reward_type` int(11) NOT NULL,
-  `reward_id` int(11) NOT NULL,
-  `reward_count` int(11) DEFAULT NULL,
-  `comment` varchar(50) DEFAULT NULL,
-  PRIMARY KEY (`mode`,`reward_type`,`reward_id`)
+  `mode` int NOT NULL,
+  `reward_level` int NOT NULL,
+  `reward_type` int NOT NULL,
+  `reward_id` int NOT NULL,
+  `reward_count` int DEFAULT NULL,
+  `comment` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  PRIMARY KEY (`mode`,`reward_level`,`reward_type`,`reward_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Prize Handler 
 -- Used as the sender of the above rewards, you can rename this NPC to change the reward senders name.
+-- Do not change the entry, specified entry needed by server to actually deliver the prizes.
 DELETE FROM `creature_template` WHERE `entry`=441102;
-INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction`, `npcflag`, `speed_walk`, `speed_run`, `speed_swim`, `speed_flight`, `detection_range`, `scale`, `rank`, `dmgschool`, `DamageModifier`, `BaseAttackTime`, `RangeAttackTime`, `BaseVariance`, `RangeVariance`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `HoverHeight`, `HealthModifier`, `ManaModifier`, `ArmorModifier`, `ExperienceModifier`, `RacialLeader`, `movementId`, `RegenHealth`, `mechanic_immune_mask`, `spell_school_immune_mask`, `flags_extra`, `ScriptName`, `VerifiedBuild`) VALUES (441102, 0, 0, 0, 0, 0, 'Prize Handler', '', '', 0, 1, 1, 0, 35, 0, 1, 1.14286, 1, 1, 20, 1, 0, 0, 1, 2000, 2000, 1, 1, 1, 0, 2048, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, '', 10314);
+INSERT INTO `creature_template` (`entry`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction`, `npcflag`, `speed_run`, `detection_range`, `rank`, `dmgschool`, `DamageModifier`, `BaseAttackTime`, `RangeAttackTime`, `BaseVariance`, `RangeVariance`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `HoverHeight`, `HealthModifier`, `ManaModifier`, `ArmorModifier`, `ExperienceModifier`, `RacialLeader`, `movementId`, `RegenHealth`, `CreatureImmunitiesId`, `flags_extra`, `ScriptName`, `VerifiedBuild`) VALUES (441102, 'Prize Handler', '', NULL, 0, 91, 91, 2, 35, 1, 1.14286, 20, 3, 0, 1, 2000, 0, 1, 1, 1, 0, 0, 0, 0, 7, 138936390, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 100, 100, 1, 1, 0, 0, 1, 0, 0, '', NULL);
 
 DELETE FROM `creature_template_model` WHERE `CreatureID`=441102 AND `Idx`=0;
 INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`, `VerifiedBuild`) VALUES (441102, 0, 27104, 1, 1, 1);

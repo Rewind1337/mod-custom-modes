@@ -4,7 +4,7 @@
 
 void SC_AddHardModeScripts();
 
-void AddHardModeScripts()
+void Addmod_custom_modesScripts()
 {
     SC_AddHardModeScripts();
 }

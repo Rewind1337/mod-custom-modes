@@ -12,7 +12,7 @@
 #include "HardModeHooks/HardModeHooksUnit.h"
 #include "HardModeHooks/HardModeHooksWorld.h"
 
-void HardModePlayerScript::OnLevelChanged(Player* player, uint8 /*oldLevel*/)
+void HardModePlayerScript::OnPlayerLevelChanged(Player* player, uint8 /*oldLevel*/)
 {
     if (!sHardModeHandler->IsHardModeEnabled())
     {
@@ -70,7 +70,7 @@ void HardModePlayerScript::OnLevelChanged(Player* player, uint8 /*oldLevel*/)
     }
 }
 
-void HardModePlayerScript::OnLogout(Player* player)
+void HardModePlayerScript::OnPlayerLogout(Player* player)
 {
     if (!sHardModeHandler->IsHardModeEnabled())
     {

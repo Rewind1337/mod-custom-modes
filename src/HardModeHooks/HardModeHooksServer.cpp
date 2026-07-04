@@ -7,7 +7,7 @@
 #include "Player.h"
 #include "SocialMgr.h"
 
-bool HardModeHooksServerScript::CanPacketSend(WorldSession* session, WorldPacket& packet)
+bool HardModeHooksServerScript::CanPacketSend(WorldSession* session, WorldPacket const& packet)
 {
     if (!sHardModeHandler->IsHardModeEnabled())
     {
@@ -31,33 +31,43 @@ bool HardModeHooksServerScript::CanPacketSend(WorldSession* session, WorldPacket
         return true;
     }
 
+    WorldPacket modifiedPacket(packet);
+
     auto opCode = packet.GetOpcode();
     bool resend = false;
 
     switch (opCode)
     {
     case SMSG_WHO:
-        resend = HandleWhoListOverride(packet);
-        break;
+    {
+        resend = HandleWhoListOverride(modifiedPacket);
 
+        if (resend)
+        {
+            modifiedPacket << HARDMODE_PACKET_TAIL;
+            player->SendDirectMessage(&modifiedPacket);
+            return false;
+        }
+        break;
+    }
     case SMSG_FRIEND_STATUS:
     case SMSG_CONTACT_LIST:
-        resend = HandleFriendsListOverride(packet);
+        resend = HandleFriendsListOverride(modifiedPacket);
         break;
 
     case SMSG_GUILD_ROSTER:
-        resend = HandleGuildRosterOverride(packet);
+        resend = HandleGuildRosterOverride(modifiedPacket);
         break;
     case SMSG_INSPECT_TALENT:
-        HandleInspectOverride(player, packet);
+        HandleInspectOverride(player, modifiedPacket);
         break;
     }
 
     if (resend)
     {
         // Modify the tail, resend and stop sending the original.
-        packet << HARDMODE_PACKET_TAIL;
-        player->SendDirectMessage(&packet);
+        modifiedPacket << HARDMODE_PACKET_TAIL;
+        player->SendDirectMessage(&modifiedPacket);
 
         return false;
     }
@@ -113,6 +123,7 @@ bool HardModeHooksServerScript::HandleGetMailListOverride(WorldSession* session)
 
 bool HardModeHooksServerScript::HandleWhoListOverride(WorldPacket& packet)
 {
+
     bool resendPacket = false;
 
     uint32 displayCount = packet.read<uint32>();
@@ -127,18 +138,18 @@ bool HardModeHooksServerScript::HandleWhoListOverride(WorldPacket& packet)
     for (uint32 i = 0; i < displayCount; ++i)
     {
         std::string playerName = packet.read<std::string>();
-        packet.read_skip<std::string>(); //GuildName
-        packet.read_skip<uint32>(); //PlayerLvl
-        packet.read_skip<uint32>(); //PlayerClass
-        packet.read_skip<uint32>(); //PlayerRace
-        packet.read_skip<uint8>(); //PlayerGender
-        packet.read_skip<uint32>(); //PlayerZoneId
+        packet.read_skip<std::string>(); // GuildName
+        packet.read_skip<uint32>();      // PlayerLvl
+        packet.read_skip<uint32>();      // PlayerClass
+        packet.read_skip<uint32>();      // PlayerRace
+        packet.read_skip<uint8>();       // PlayerGender
+        packet.read_skip<uint32>();      // PlayerZoneId
 
         auto targetGuid = sHardModeHandler->GetGUIDFromPlayerName(playerName);
         if (targetGuid && sHardModeHandler->PlayerHasRestriction(*targetGuid, HARDMODE_RESTRICT_HIDE_WHOLIST))
         {
             packet.put(packet.rpos() - 4, static_cast<uint32>(HARDMODE_AREA_UNKNOWN)); // ZoneId
-            packet.put(packet.rpos() - 17, 0); // PlayerLvl
+            packet.put(packet.rpos() - 17, uint32(0)); // PlayerLvl
             resendPacket = true;
         }
     }
@@ -336,7 +347,7 @@ void HardModeHooksServerScript::HandleInspectOverride(Player* player, WorldPacke
     sHardModeHandler->SendAlert(player, sFormat);
 }
 
-bool HardModeHooksServerScript::HasModifiedTail(WorldPacket& packet)
+bool HardModeHooksServerScript::HasModifiedTail(WorldPacket const& packet)
 {
     if (packet.size() < 4)
     {

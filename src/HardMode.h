@@ -9,8 +9,8 @@ public:
     HardModePlayerScript() : PlayerScript("HardModePlayerScript") { }
 
 private:
-    void OnLevelChanged(Player* player, uint8 oldLevel) override;
-    void OnLogout(Player* player) override;
+    void OnPlayerLevelChanged(Player* player, uint8 oldLevel) override;
+    void OnPlayerLogout(Player* player) override;
 };
 
 class HardModeWorldScript : WorldScript

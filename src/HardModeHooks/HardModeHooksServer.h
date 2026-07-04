@@ -14,7 +14,7 @@ public:
     HardModeHooksServerScript() : ServerScript("HardModeHooksServerScript") { }
 
 private:
-    bool CanPacketSend(WorldSession* session, WorldPacket& packet) override;
+    bool CanPacketSend(WorldSession* session, WorldPacket const& packet);
     bool CanPacketReceive(WorldSession* session, WorldPacket& packet) override;
     bool HandleGetMailListOverride(WorldSession* session);
     bool HandleWhoListOverride(WorldPacket& packet);
@@ -23,7 +23,7 @@ private:
     bool HandleContactList(WorldPacket& packet);
     bool HandleGuildRosterOverride(WorldPacket& packet);
     void HandleInspectOverride(Player* player, WorldPacket& packet);
-    bool HasModifiedTail(WorldPacket& packet);
+    bool HasModifiedTail(WorldPacket const& packet);
 };
 
 #endif // MODULE_HARDMODE_HOOKS_SERVER_H

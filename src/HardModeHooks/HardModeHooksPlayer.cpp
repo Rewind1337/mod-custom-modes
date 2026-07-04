@@ -5,7 +5,7 @@
 #include "Config.h"
 #include "Player.h"
 
-void HardModeHooksPlayerScript::OnGiveXP(Player* player, uint32& amount, Unit* /*victim*/, uint8 xpSource)
+void HardModeHooksPlayerScript::OnPlayerGiveXP(Player* player, uint32& amount, Unit* /*victim*/, uint8 xpSource)
 {
     if (!sHardModeHandler->IsHardModeEnabled())
     {
@@ -37,7 +37,7 @@ void HardModeHooksPlayerScript::OnGiveXP(Player* player, uint32& amount, Unit* /
     }
 }
 
-void HardModeHooksPlayerScript::OnQuestComputeXP(Player* player, Quest const* /*quest*/, uint32& xpValue)
+void HardModeHooksPlayerScript::OnPlayerQuestComputeXP(Player* player, Quest const* /*quest*/, uint32& xpValue)
 {
     if (!sHardModeHandler->IsHardModeEnabled())
     {
@@ -55,7 +55,7 @@ void HardModeHooksPlayerScript::OnQuestComputeXP(Player* player, Quest const* /*
     }
 }
 
-bool HardModeHooksPlayerScript::CanEquipItem(Player* player, uint8 /*slot*/, uint16& /*dest*/, Item* pItem, bool /*swap*/, bool /*notLoading*/)
+bool HardModeHooksPlayerScript::OnPlayerCanEquipItem(Player* player, uint8 /*slot*/, uint16& /*dest*/, Item* pItem, bool /*swap*/, bool /*notLoading*/)
 {
     if (!sHardModeHandler->IsHardModeEnabled())
     {
@@ -97,7 +97,7 @@ bool HardModeHooksPlayerScript::CanEquipItem(Player* player, uint8 /*slot*/, uin
     return true;
 }
 
-bool HardModeHooksPlayerScript::CanCastItemUseSpell(Player* player, Item* item, SpellCastTargets const& /*targets*/, uint8 /*castCount*/, uint32 /*glyphIndex*/)
+bool HardModeHooksPlayerScript::OnPlayerCanCastItemUseSpell(Player* player, Item* item, SpellCastTargets const& /*targets*/, uint8 /*castCount*/, uint32 /*glyphIndex*/)
 {
     if (!sHardModeHandler->IsHardModeEnabled())
     {
@@ -146,7 +146,7 @@ bool HardModeHooksPlayerScript::CanCastItemUseSpell(Player* player, Item* item, 
     return true;
 }
 
-void HardModeHooksPlayerScript::OnCreateItem(Player* player, Item* item, uint32 /*count*/)
+void HardModeHooksPlayerScript::OnPlayerCreateItem(Player* player, Item* item, uint32 /*count*/)
 {
     if (!sHardModeHandler->IsHardModeEnabled())
     {
@@ -176,7 +176,7 @@ void HardModeHooksPlayerScript::OnCreateItem(Player* player, Item* item, uint32 
     }
 }
 
-void HardModeHooksPlayerScript::OnPlayerResurrect(Player* player, float /*restorePercent*/, bool /*applySickness*/)
+void HardModeHooksPlayerScript::OnPlayerResurrect(Player* player, float /*restorePercent*/, bool& /*applySickness*/)
 {
     if (!sHardModeHandler->IsHardModeEnabled())
     {
@@ -214,7 +214,7 @@ void HardModeHooksPlayerScript::OnPlayerReleasedGhost(Player* player)
     }
 }
 
-bool HardModeHooksPlayerScript::CanRepopAtGraveyard(Player* player)
+bool HardModeHooksPlayerScript::OnPlayerCanRepopAtGraveyard(Player* player)
 {
     if (!sHardModeHandler->IsHardModeEnabled())
     {
@@ -234,7 +234,7 @@ bool HardModeHooksPlayerScript::CanRepopAtGraveyard(Player* player)
     return true;
 }
 
-bool HardModeHooksPlayerScript::OnBeforeTeleport(Player* player, uint32 mapId, float /*x*/, float /*y*/, float /*z*/, float /*orientation*/, uint32 /*options*/, Unit* /*target*/)
+bool HardModeHooksPlayerScript::OnPlayerBeforeTeleport(Player* player, uint32 mapId, float /*x*/, float /*y*/, float /*z*/, float /*orientation*/, uint32 /*options*/, Unit* /*target*/)
 {
     if (!sHardModeHandler->IsHardModeEnabled())
     {
@@ -266,7 +266,7 @@ void HardModeHooksPlayerScript::OnPlayerLearnTalents(Player* player, uint32 /*ta
     }
 }
 
-bool HardModeHooksPlayerScript::CanInitTrade(Player* player, Player* target)
+bool HardModeHooksPlayerScript::OnPlayerCanInitTrade(Player* player, Player* target)
 {
     if (!sHardModeHandler->IsHardModeEnabled())
     {
@@ -278,10 +278,17 @@ bool HardModeHooksPlayerScript::CanInitTrade(Player* player, Player* target)
         return true;
     }
 
+    TradeStatusInfo pInfo;
+    pInfo.Status = TRADE_STATUS_TRADE_CANCELED;
+    pInfo.TraderGuid = player->GetGUID();
+    TradeStatusInfo tInfo;
+    tInfo.Status = TRADE_STATUS_TRADE_CANCELED;
+    tInfo.TraderGuid = target->GetGUID();
+
     if (sHardModeHandler->PlayerHasRestriction(player->GetGUID(), HARDMODE_RESTRICT_INTERACT_TRADE))
     {
-        player->GetSession()->SendTradeStatus(TRADE_STATUS_TRADE_CANCELED);
-        target->GetSession()->SendTradeStatus(TRADE_STATUS_TRADE_CANCELED);
+        player->GetSession()->SendTradeStatus(pInfo);
+        target->GetSession()->SendTradeStatus(tInfo);
 
         auto restrictedModes = sHardModeHandler->GetPlayerModesFromRestriction(player->GetGUID(), HARDMODE_RESTRICT_INTERACT_TRADE);
         std::string alert = Acore::StringFormat("You cannot trade players while in the {} mode(s).", sHardModeHandler->GetDelimitedModes(restrictedModes, ", "));
@@ -292,8 +299,8 @@ bool HardModeHooksPlayerScript::CanInitTrade(Player* player, Player* target)
 
     if (sHardModeHandler->PlayerHasRestriction(target->GetGUID(), HARDMODE_RESTRICT_INTERACT_TRADE))
     {
-        player->GetSession()->SendTradeStatus(TRADE_STATUS_TRADE_CANCELED);
-        target->GetSession()->SendTradeStatus(TRADE_STATUS_TRADE_CANCELED);
+        player->GetSession()->SendTradeStatus(pInfo);
+        target->GetSession()->SendTradeStatus(tInfo);
 
         auto restrictedModes = sHardModeHandler->GetPlayerModesFromRestriction(target->GetGUID(), HARDMODE_RESTRICT_INTERACT_TRADE);
         std::string alert = Acore::StringFormat("You cannot trade players in the {} mode(s).", sHardModeHandler->GetDelimitedModes(restrictedModes, ", "));
@@ -315,7 +322,7 @@ bool HardModeHooksPlayerScript::CanInitTrade(Player* player, Player* target)
     return true;
 }
 
-bool HardModeHooksPlayerScript::CanSendMail(Player* player, ObjectGuid receiverGuid, ObjectGuid /*mailbox*/, std::string& /*subject*/, std::string& /*body*/, uint32 /*money*/, uint32 /*cod*/, Item* /*item*/)
+bool HardModeHooksPlayerScript::OnPlayerCanSendMail(Player* player, ObjectGuid receiverGuid, ObjectGuid /*mailbox*/, std::string& /*subject*/, std::string& /*body*/, uint32 /*money*/, uint32 /*cod*/, Item* /*item*/)
 {
     if (!sHardModeHandler->IsHardModeEnabled())
     {
@@ -356,7 +363,7 @@ bool HardModeHooksPlayerScript::CanSendMail(Player* player, ObjectGuid receiverG
     return true;
 }
 
-bool HardModeHooksPlayerScript::CanJoinLfg(Player* player, uint8 /*roles*/, lfg::LfgDungeonSet& /*dungeons*/, const std::string& /*comment*/)
+bool HardModeHooksPlayerScript::OnPlayerCanJoinLfg(Player* player, uint8 /*roles*/, lfg::LfgDungeonSet& /*dungeons*/, const std::string& /*comment*/)
 {
     if (!sHardModeHandler->IsHardModeEnabled())
     {
@@ -374,7 +381,7 @@ bool HardModeHooksPlayerScript::CanJoinLfg(Player* player, uint8 /*roles*/, lfg:
     return true;
 }
 
-bool HardModeHooksPlayerScript::CanGroupInvite(Player* player, std::string& memberName)
+bool HardModeHooksPlayerScript::OnPlayerCanGroupInvite(Player* player, std::string& memberName)
 {
     if (!sHardModeHandler->IsHardModeEnabled())
     {
@@ -446,7 +453,7 @@ bool HardModeHooksPlayerScript::CanGroupInvite(Player* player, std::string& memb
     return true;
 }
 
-void HardModeHooksPlayerScript::OnLogin(Player* player)
+void HardModeHooksPlayerScript::OnPlayerLogin(Player* player)
 {
     if (!sHardModeHandler->IsHardModeEnabled())
     {
@@ -478,7 +485,7 @@ void HardModeHooksPlayerScript::OnLogin(Player* player)
     }
 }
 
-void HardModeHooksPlayerScript::OnDelete(ObjectGuid guid, uint32 accountId)
+void HardModeHooksPlayerScript::OnPlayerDelete(ObjectGuid guid, uint32 accountId)
 {
     if (!sHardModeHandler->IsHardModeEnabled())
     {

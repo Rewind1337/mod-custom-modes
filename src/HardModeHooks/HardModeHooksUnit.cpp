@@ -1,5 +1,6 @@
 #include "HardModeHooks/HardModeHooksUnit.h"
 #include "HardModeHandler.h"
+#include <WorldSessionMgr.h>
 
 void HardModeHooksUnitScript::OnAuraApply(Unit* unit, Aura* /*aura*/)
 {
@@ -329,5 +330,5 @@ void HardModeHooksUnitScript::OnUnitDeath(Unit* unit, Unit* killer)
         ss << Acore::StringFormat("|cffFF0000Player {} has died while undertaking the permadeath restriction!", player->GetName());
     }
 
-    sWorld->SendServerMessage(SERVER_MSG_STRING, ss.str());
+    sWorldSessionMgr->SendServerMessage(SERVER_MSG_STRING, ss.str());
 }
